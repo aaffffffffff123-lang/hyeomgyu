@@ -189,7 +189,7 @@ const videos=[
 ].map(v=>({...v,type:'video'}));
 const byVideo=new Map(videos.map(v=>[v.id,v]));
 const item=id=>byId.get(id)||byVideo.get(id);
-const thumb=v=>'https://i.ytimg.com/vi/'+v.id+'/hqdefault.jpg';
+const thumb=v=>'https://img.youtube.com/vi/'+v.id+'/hqdefault.jpg';
 const norm=s=>(s||'').normalize('NFC').toLowerCase().replace(/[^0-9a-z가-힣]/g,'');
 function parseCSV(text){
   const rows=[];let row=[],f='',q=false;
