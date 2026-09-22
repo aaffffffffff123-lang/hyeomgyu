@@ -99,12 +99,12 @@ body.reading .edge:disabled{display:none}
 #grid a img{width:100%;height:100%;object-fit:contain}
 #grid a{position:relative}
 #grid a .pg{position:absolute;right:4px;bottom:4px;min-width:20px;height:20px;padding:0 5px;background:var(--ink);color:var(--white);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
-#grid.video-grid{--tile:clamp(220px,32vw,320px);grid-template-rows:repeat(2,210px);grid-auto-columns:var(--tile);height:448px}
+#grid.video-grid{--tile:clamp(220px,30vw,400px);--vrow:clamp(210px,calc((100dvh - var(--top) - 180px)/2),320px);grid-template-rows:repeat(2,var(--vrow));grid-auto-columns:var(--tile);height:calc(var(--vrow)*2 + 28px)}
 #grid.video-grid a{display:flex;flex-direction:column}
-#grid.video-grid a img{height:155px;flex:none;object-fit:cover}
-.play-icon{position:absolute;top:54px;left:50%;transform:translateX(-50%);width:46px;height:46px;border-radius:50%;background:var(--mark);border:2px solid var(--ink);display:grid;place-items:center;font-size:22px;box-shadow:2px 2px 0 var(--ink)}
+#grid.video-grid a img{height:calc(var(--vrow) - 54px);flex:none;object-fit:cover}
+.play-icon{position:absolute;top:calc(50% - 50px);left:50%;transform:translateX(-50%);width:46px;height:46px;border-radius:50%;background:var(--mark);border:2px solid var(--ink);display:grid;place-items:center;font-size:22px;box-shadow:2px 2px 0 var(--ink)}
 .video-card-title{font-size:13px;font-weight:700;padding:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-@media(max-width:600px){#grid.video-grid{grid-template-rows:repeat(2,186px);height:396px}#grid.video-grid a img{height:130px}.play-icon{top:42px}}
+@media(max-width:600px){#grid.video-grid{--tile:clamp(220px,75vw,320px);--vrow:186px;height:396px}#grid.video-grid a img{height:130px}.play-icon{top:42px}}
 #empty{padding:60px 10px;text-align:center;color:var(--mute);font-size:14px;line-height:1.6}
 #more{display:block;margin:20px auto 0;height:44px;padding:0 20px;background:var(--white);border:2.5px solid var(--ink);box-shadow:3px 3px 0 var(--ink);font-weight:700}
 #more[hidden]{display:none}
