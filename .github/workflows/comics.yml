@@ -1,0 +1,61 @@
+name: comics
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: comics
+  cancel-in-progress: false
+
+jobs:
+  process:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: 도구 설치
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq tesseract-ocr > /dev/null
+          pip install -q pillow numpy opencv-python-headless pytesseract kiwipiepy
+      - name: inbox 처리
+        run: python tools/process.py
+      - name: 저장
+        run: |
+          git config user.name "comics-bot"
+          git config user.email "comics-bot@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then echo "바뀐 게 없음"; else git commit -m "새 만화 반영"; fi
+          git pull --rebase origin main
+          git push origin HEAD:main
+
+  deploy:
+    needs: process
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - id: deployment
+        uses: actions/deploy-pages@v4
