@@ -37,16 +37,33 @@ img{display:block;max-width:100%}
 .round svg{width:20px;height:20px}
 svg.ic{fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
 
-/* ---------- stage (single comic) ---------- */
-#stage{position:fixed;inset:0;padding:calc(var(--top) + var(--sat)) 16px calc(var(--bar) + 22px + var(--sab));display:none;flex-direction:column;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+/* ---------- stage ---------- */
+#stage{position:fixed;inset:0;padding:calc(var(--top) + var(--sat)) 16px calc(var(--bar) + 22px + var(--sab));display:none;flex-direction:column;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
 #stage.show{display:flex}
 #frame{margin:auto;flex-shrink:0;width:600px;max-width:100%;display:flex;flex-direction:column;gap:18px;padding:0 10px 10px 0}
 #frame img{display:block;width:100%;height:auto;border:3px solid var(--ink);box-shadow:8px 8px 0 var(--ink);background:var(--white)}
 #frame.empty{width:min(80vw,420px);aspect-ratio:1;background:var(--white);border:3px solid var(--ink);box-shadow:8px 8px 0 var(--ink);align-items:center;justify-content:center;line-height:1.4;font-size:14px;color:var(--mute);text-align:center;padding:20px}
+#frame.slide-next{animation:in-right .25s cubic-bezier(.2,.75,.2,1) both}
+#frame.slide-prev{animation:in-left .25s cubic-bezier(.2,.75,.2,1) both}
+@keyframes in-right{from{opacity:.7;transform:translateX(75px)}to{opacity:1;transform:translateX(0)}}
+@keyframes in-left{from{opacity:.7;transform:translateX(-75px)}to{opacity:1;transform:translateX(0)}}
+#frame.video{gap:12px;align-items:stretch}
+#frame.video iframe{display:block;width:100%;aspect-ratio:16/9;border:3px solid var(--ink);box-shadow:8px 8px 0 var(--ink);background:#111}
+#frame.video.portrait iframe{aspect-ratio:9/16}
+.video-title{font-weight:700;font-size:18px;margin:10px 0 0}
+.video-source{align-self:flex-start;font-size:13px;font-weight:700;text-underline-offset:3px}
 .edge{position:fixed;top:50%;transform:translateY(-50%);width:44px;height:64px;display:none;align-items:center;justify-content:center;background:var(--white);border:2.5px solid var(--ink);box-shadow:3px 3px 0 var(--ink);z-index:15}
 .edge svg{width:22px;height:22px}
 #edgeL{left:14px}#edgeR{right:14px}
-@media(min-width:900px){body.inlist .edge{display:flex}}
+@media(min-width:900px){body.reading .edge{display:flex}}
+.edge:disabled{opacity:.3;cursor:default}
+.edge img,.edge span{display:none}
+@media(min-width:1240px){
+  body.reading .edge:not(:disabled){width:clamp(108px,11vw,154px);height:auto;min-height:148px;flex-direction:column;gap:8px;padding:8px}
+  .edge img{display:block;width:100%;aspect-ratio:1;object-fit:contain;background:var(--white);border:1px solid var(--ink)}
+  .edge img[hidden]{display:none}
+  .edge span{display:block;font-size:12px;font-weight:700}
+}
 
 /* ---------- bottom bar ---------- */
 #bar{position:fixed;left:50%;bottom:calc(12px + var(--sab));transform:translateX(-50%);display:none;background:var(--white);border:3px solid var(--ink);box-shadow:5px 5px 0 var(--ink);padding:4px;gap:2px;z-index:20;max-width:calc(100vw - 20px)}
@@ -58,11 +75,12 @@ svg.ic{fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;strok
 #bar button[hidden]{display:none}
 
 /* ---------- lists ---------- */
-#list{display:none;padding:calc(var(--top) + var(--sat) + 8px) 12px calc(40px + var(--sab));max-width:1180px;margin:0 auto}
+#list{display:none;padding:calc(var(--top) + var(--sat) + 8px) 16px calc(28px + var(--sab));height:100dvh;overflow:hidden}
 #list.show{display:block}
 #lhead{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 14px}
 #lhead .t{font-weight:700;font-size:15px;margin-right:4px}
 #lhead .n{color:var(--mute);font-size:13px}
+.wall-hint{margin-left:auto;color:var(--mute);font-size:12px;font-weight:700}
 .chip{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;background:var(--white);border:2px solid var(--ink);box-shadow:2px 2px 0 var(--ink);font-size:13px;font-weight:700;transition:transform .06s}
 .chip:active{transform:translate(1px,1px);box-shadow:1px 1px 0 var(--ink)}
 .chip.on{background:var(--mark)}
@@ -72,13 +90,20 @@ svg.ic{fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;strok
 #search.show{display:block}
 #q{width:100%;height:50px;border:3px solid var(--ink);background:var(--white);box-shadow:4px 4px 0 var(--ink);padding:0 14px;font:inherit;font-size:17px;font-weight:700;outline:none}
 #q::placeholder{color:#a6a6a0;font-weight:500}
-#grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(106px,1fr));gap:8px}
-@media(min-width:600px){#grid{grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}}
-#grid a{display:block;aspect-ratio:1;background:var(--white);border:2px solid var(--ink);overflow:hidden;transition:transform .06s}
+#grid{--tile:clamp(110px,31vw,146px);display:grid;grid-auto-flow:column;grid-template-rows:repeat(3,var(--tile));grid-auto-columns:var(--tile);gap:10px;width:100%;height:calc(var(--tile)*3 + 34px);padding:2px 4px 12px;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;scroll-snap-type:x proximity;scrollbar-color:var(--ink) transparent}
+@media(min-width:700px){#grid{--tile:clamp(135px,17vw,min(216px,calc((100dvh - var(--top) - 140px)/3)));gap:14px;grid-template-rows:repeat(3,var(--tile));height:calc(var(--tile)*3 + 42px)}}
+@media(max-height:660px){#grid{--tile:clamp(104px,22vh,160px)}}
+#grid a{display:block;width:100%;height:100%;background:var(--white);border:2px solid var(--ink);overflow:hidden;scroll-snap-align:start;transition:transform .06s}
 #grid a:active{transform:translate(1px,1px)}
 #grid a img{width:100%;height:100%;object-fit:contain}
 #grid a{position:relative}
 #grid a .pg{position:absolute;right:4px;bottom:4px;min-width:20px;height:20px;padding:0 5px;background:var(--ink);color:var(--white);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+#grid.video-grid{--tile:clamp(220px,32vw,320px);grid-template-rows:repeat(2,210px);grid-auto-columns:var(--tile);height:448px}
+#grid.video-grid a{display:flex;flex-direction:column}
+#grid.video-grid a img{height:155px;flex:none;object-fit:cover}
+.play-icon{position:absolute;top:54px;left:50%;transform:translateX(-50%);width:46px;height:46px;border-radius:50%;background:var(--mark);border:2px solid var(--ink);display:grid;place-items:center;font-size:22px;box-shadow:2px 2px 0 var(--ink)}
+.video-card-title{font-size:13px;font-weight:700;padding:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(max-width:600px){#grid.video-grid{grid-template-rows:repeat(2,186px);height:396px}#grid.video-grid a img{height:130px}.play-icon{top:42px}}
 #empty{padding:60px 10px;text-align:center;color:var(--mute);font-size:14px;line-height:1.6}
 #more{display:block;margin:20px auto 0;height:44px;padding:0 20px;background:var(--white);border:2.5px solid var(--ink);box-shadow:3px 3px 0 var(--ink);font-weight:700}
 #more[hidden]{display:none}
@@ -86,7 +111,7 @@ svg.ic{fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;strok
 /* ---------- misc ---------- */
 #toast{position:fixed;left:50%;bottom:calc(var(--bar) + 26px + var(--sab));transform:translateX(-50%) translateY(6px);background:var(--ink);color:var(--white);padding:9px 14px;font-size:13.5px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .15s,transform .15s;z-index:30;white-space:nowrap;max-width:calc(100vw - 24px)}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
 <body>
@@ -96,14 +121,15 @@ svg.ic{fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;strok
   <div>
     <button class="round" id="bSearch" aria-label="검색"><svg class="ic" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg></button>
     <button class="round" id="bBrowse" aria-label="열람"><svg class="ic" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7"/><rect x="13.5" y="3.5" width="7" height="7"/><rect x="3.5" y="13.5" width="7" height="7"/><rect x="13.5" y="13.5" width="7" height="7"/></svg></button>
+    <button class="round" id="bVideos" aria-label="영상"><svg class="ic" viewBox="0 0 24 24"><rect x="2.5" y="4" width="19" height="16" rx="2"/><path d="m10 8 6 4-6 4z"/></svg></button>
   </div>
 </div>
 
 <div id="stage">
   <div id="frame"></div>
 </div>
-<button class="edge" id="edgeL" aria-label="이전"><svg class="ic" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
-<button class="edge" id="edgeR" aria-label="다음"><svg class="ic" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+<button class="edge" id="edgeL" aria-label="이전"><svg class="ic" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg><img alt="" hidden><span>이전</span></button>
+<button class="edge" id="edgeR" aria-label="다음"><svg class="ic" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg><img alt="" hidden><span>다음</span></button>
 
 <div id="list">
   <div id="search"><input id="q" type="search" placeholder="대사나 낱말" autocomplete="off" enterkeyhint="search"></div>
@@ -117,7 +143,7 @@ svg.ic{fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;strok
   <button id="bList" hidden><svg class="ic" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg>목록</button>
   <button id="bPrev" hidden><svg class="ic" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>이전</button>
   <button id="bNext" hidden><svg class="ic" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>다음</button>
-  <button id="bRandom"><svg class="ic" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="3"/><circle cx="8.5" cy="8.5" r="1.3" fill="currentColor"/><circle cx="15.5" cy="8.5" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/><circle cx="8.5" cy="15.5" r="1.3" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.3" fill="currentColor"/></svg>다른 거</button>
+  <button id="bRandom"><svg class="ic" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>다음</button>
   <button id="bSim"><svg class="ic" viewBox="0 0 24 24"><rect x="3.5" y="7.5" width="12" height="12"/><path d="M8.5 7.5v-4h12v12h-4"/></svg>비슷한 거</button>
   <button id="bBm" class="star"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.6 6.1.7-4.5 4.2 1.2 6-5.4-3-5.4 3 1.2-6-4.5-4.2 6.1-.7z"/></svg>북마크</button>
   <button id="bSave"><svg class="ic" viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M4 19h16"/></svg>저장</button>
@@ -130,7 +156,7 @@ svg.ic{fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;strok
 'use strict';
 const $=s=>document.querySelector(s);
 const el={stage:$('#stage'),frame:$('#frame'),list:$('#list'),grid:$('#grid'),lhead:$('#lhead'),empty:$('#empty'),more:$('#more'),search:$('#search'),q:$('#q'),bar:$('#bar'),toast:$('#toast'),
-  bSearch:$('#bSearch'),bBrowse:$('#bBrowse'),bList:$('#bList'),bPrev:$('#bPrev'),bNext:$('#bNext'),bRandom:$('#bRandom'),bSim:$('#bSim'),bBm:$('#bBm'),bSave:$('#bSave'),edgeL:$('#edgeL'),edgeR:$('#edgeR'),logo:$('#logo')};
+  bSearch:$('#bSearch'),bBrowse:$('#bBrowse'),bVideos:$('#bVideos'),bList:$('#bList'),bPrev:$('#bPrev'),bNext:$('#bNext'),bRandom:$('#bRandom'),bSim:$('#bSim'),bBm:$('#bBm'),bSave:$('#bSave'),edgeL:$('#edgeL'),edgeR:$('#edgeR'),logo:$('#logo')};
 
 /* ---------- storage: this browser only ---------- */
 const store={
@@ -145,6 +171,25 @@ const saveBm=()=>store.set('hg_bm',[...bm]);
 /* ---------- data ---------- */
 const comics=[];          // {id, kw:Set, kwn:[], norm}
 const byId=new Map();
+// 혐규만화 유튜브 채널의 공개 영상. 영상 파일은 보관하지 않고 재생할 때만 YouTube 플레이어를 연다.
+const videos=[
+  {id:'7po9XEQ0Y9U',title:'애착이론',portrait:true},
+  {id:'OZJ9b0F7ZaY',title:'아무도 뺏지 않는'},
+  {id:'LXXLFd3gNh4',title:'자존감이 너무 낮아서'},
+  {id:'3UBGPWNDv98',title:'세상에서 가장 쉬운 치유'},
+  {id:'PMlY9r1noG0',title:'자세히 보아야 예쁘다'},
+  {id:'yz6ytDpFUPc',title:'웃어서 행복한 것이다'},
+  {id:'-y2JRkpyol4',title:'사랑 받을 가치'},
+  {id:'2SSDhd7qBvY',title:'인생꿀팁'},
+  {id:'NM3_6qe1mGc',title:'아이들에게 인권을 설명하는 동화책'},
+  {id:'Xyks1UNxwmo',title:'AI로 만듦'},
+  {id:'_3UQ-Fo8c4o',title:'ai로 만듦'},
+  {id:'M0iw2a3-JWY',title:'ai로 만듦'},
+  {id:'sXc6m92X4II',title:'파렛트 자키',portrait:true}
+].map(v=>({...v,type:'video'}));
+const byVideo=new Map(videos.map(v=>[v.id,v]));
+const item=id=>byId.get(id)||byVideo.get(id);
+const thumb=v=>'https://i.ytimg.com/vi/'+v.id+'/hqdefault.jpg';
 const norm=s=>(s||'').normalize('NFC').toLowerCase().replace(/[^0-9a-z가-힣]/g,'');
 function parseCSV(text){
   const rows=[];let row=[],f='',q=false;
@@ -204,51 +249,89 @@ function preload(){
 }
 
 /* ---------- state ---------- */
-let cur=null;            // comic on the stage
+let cur=null;            // comic or video on the stage
 let ctx=null;            // list context {kind, ids, title, index, extra}
 let view='home';         // 'home' | 'viewer' | 'list'
 let shown=0;
 const PAGE=120;
+let trail=[], trailIndex=-1; // the path through random comics in this session
 
 function fitWidth(){
   // 가로 폭 우선: 정사각형 만화가 화면에 딱 맞는 폭을 기준으로 잡고, 그보다 세로로 긴 만화는 같은 폭으로 두고 스크롤한다
   const cs=getComputedStyle(el.stage);
   const w=el.stage.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight);
   const h=el.stage.clientHeight-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom);
-  el.frame.style.width=Math.max(220,Math.min(w,h-14))+'px';
+  const width=cur&&cur.type==='video'
+    ?Math.min(w,cur.portrait?Math.min(400,h*9/16):Math.min(860,h*16/9))
+    :Math.min(w,h-14,780);
+  el.frame.style.width=Math.max(220,width)+'px';
 }
 window.addEventListener('resize',()=>{ if(view!=='list') fitWidth(); });
 function setView(v){
   view=v;
-  const isList=v==='list', inList=v==='viewer';
+  const isList=v==='list', inList=v==='viewer', isVideo=cur&&cur.type==='video';
   el.stage.classList.toggle('show',!isList);
   el.bar.classList.toggle('show',!isList);
   el.list.classList.toggle('show',isList);
   document.body.classList.toggle('inlist',inList);
-  el.bBrowse.classList.toggle('on',isList&&!!ctx&&ctx.kind!=='search');
+  document.body.classList.toggle('reading',!isList);
+  el.bBrowse.classList.toggle('on',isList&&!!ctx&&ctx.kind==='browse');
+  el.bVideos.classList.toggle('on',isList&&!!ctx&&ctx.kind==='videos');
   el.bSearch.classList.toggle('on',isList&&!!ctx&&ctx.kind==='search');
-  el.bList.hidden=!inList;el.bPrev.hidden=!inList;el.bNext.hidden=!inList;el.bRandom.hidden=inList;
+  el.bList.hidden=!inList;
+  el.bPrev.hidden=!inList&&trailIndex<1;
+  el.bNext.hidden=!inList;el.bRandom.hidden=inList;
+  el.bSim.hidden=!!isVideo;el.bBm.hidden=!!isVideo;el.bSave.hidden=!!isVideo;
+  updateEdges();
+}
+
+function adjacent(d){
+  if(ctx) return item(ctx.ids[ctx.index+d]);
+  if(d<0) return item(trail[trailIndex-1]);
+  return item(trail[trailIndex+1])||(nextPick&&nextPick.c);
+}
+function updateEdges(){
+  for(const [b,d] of [[el.edgeL,-1],[el.edgeR,1]]){
+    const c=adjacent(d); b.disabled=!c;
+    const im=b.querySelector('img');
+    if(c){im.src=c.type==='video'?thumb(c):'thumb/'+c.id+'.jpg';im.hidden=false;}
+    else{im.removeAttribute('src');im.hidden=true;}
+  }
 }
 
 function show(c,opts){
   opts=opts||{};
   cur=c;
-  el.frame.classList.remove('empty');
+  el.frame.className=c.type==='video'?'video'+(c.portrait?' portrait':''):'';
   el.frame.innerHTML='';
   setView(ctx?'viewer':'home');
   fitWidth();
-  c.pages.forEach((pid,i)=>{
-    const im=document.createElement('img'); im.alt='혐규만화'; im.draggable=false; im.decoding='async';
-    if(i>0) im.loading='lazy';
-    im.onerror=()=>toast('이미지를 못 불러왔어요');
-    im.src='img/'+pid+'.png';
-    el.frame.appendChild(im);
-  });
+  if(c.type==='video'){
+    const player=document.createElement('iframe');
+    player.src='https://www.youtube-nocookie.com/embed/'+c.id+'?rel=0';
+    player.title=c.title;player.allow='accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; web-share';
+    player.allowFullscreen=true;el.frame.appendChild(player);
+    const title=document.createElement('div');title.className='video-title';title.textContent=c.title;el.frame.appendChild(title);
+    const link=document.createElement('a');link.className='video-source';link.href='https://www.youtube.com/watch?v='+c.id;
+    link.target='_blank';link.rel='noopener noreferrer';link.textContent='유튜브에서 보기 ↗';el.frame.appendChild(link);
+  }else{
+    c.pages.forEach((pid,i)=>{
+      const im=document.createElement('img'); im.alt='혐규만화'; im.draggable=false; im.decoding='async';
+      if(i>0) im.loading='lazy';
+      im.onerror=()=>toast('이미지를 못 불러왔어요');
+      im.src='img/'+pid+'.png';
+      el.frame.appendChild(im);
+    });
+    seen.add(c.id); saveSeen();
+    el.bBm.classList.toggle('on',bm.has(c.id));
+  }
+  if(opts.direction && !matchMedia('(prefers-reduced-motion:reduce)').matches){
+    el.frame.classList.add(opts.direction>0?'slide-next':'slide-prev');
+  }
   el.stage.scrollTop=0;
-  seen.add(c.id); saveSeen();
-  el.bBm.classList.toggle('on',bm.has(c.id));
-  if(opts.push) history.pushState({id:c.id,ctx:ctx?{kind:ctx.kind,extra:ctx.extra,ids:(ctx.kind==='sim'||ctx.kind==='import')?ctx.ids:null}:null},'','#'+c.id);
-  if(!ctx) preload();
+  if(opts.push) history.pushState({id:c.id,ctx:ctx?{kind:ctx.kind,extra:ctx.extra,ids:(ctx.kind==='sim'||ctx.kind==='import')?ctx.ids:null}:null},'',c.type==='video'?'#v/'+c.id:'#'+c.id);
+  if(!ctx&&c.type!=='video') preload();
+  updateEdges();
 }
 
 function goRandom(){
@@ -256,7 +339,17 @@ function goRandom(){
   if(location.hash) history.replaceState({},'',location.pathname+location.search);
   const p=nextPick||pickRandom(cur?cur.id:null); nextPick=null;
   if(p.allDone) toast(comics.length+'편 다 봤어요. 처음부터 다시 나와요');
-  show(p.c);
+  trail=trail.slice(0,trailIndex+1);trail.push(p.c.id);trailIndex=trail.length-1;
+  show(p.c,{direction:1});
+}
+function goBack(){
+  if(ctx) return step(-1);
+  if(trailIndex>0){trailIndex--;show(item(trail[trailIndex]),{direction:-1});}
+}
+function goForward(){
+  if(ctx) return step(1);
+  if(trailIndex<trail.length-1){trailIndex++;show(item(trail[trailIndex]),{direction:1});}
+  else goRandom();
 }
 
 /* ---------- lists ---------- */
@@ -265,7 +358,8 @@ function openList(kind,ids,title,extra,focusCur){
   if(cur){ const i=ids.indexOf(cur.id); if(i>=0) ctx.index=i; }
   setView('list');
   renderList();
-  if(focusCur&&ctx.index>=0){ while(shown<=ctx.index) renderMore(); scrollToCurrent(); } else window.scrollTo(0,0);
+  if(focusCur&&ctx.index>=0){ while(shown<=ctx.index) renderMore(); scrollToCurrent(); }
+  else el.grid.scrollLeft=0;
 }
 function chip(label,on,cb){
   const b=document.createElement('button');b.className='chip'+(on?' on':'');
@@ -276,10 +370,14 @@ function chip(label,on,cb){
 function listHead(){
   const c=ctx, h=el.lhead; h.innerHTML='';
   const t=document.createElement('span');t.className='t';t.textContent=c.title;h.appendChild(t);
-  const n=document.createElement('span');n.className='n';n.textContent=c.ids.length?c.ids.length.toLocaleString()+'편':'';h.appendChild(n);
+  const n=document.createElement('span');n.className='n';n.textContent=c.ids.length?c.ids.length.toLocaleString()+(c.kind==='videos'?'개':'편'):'';h.appendChild(n);
   if(c.kind==='browse'){
     h.appendChild(chip('안 본 것만',store.get('hg_unseen',false),v=>{store.set('hg_unseen',v);ctx.ids=browseIds();ctx.index=-1;renderList();window.scrollTo(0,0);}));
     h.appendChild(chip('북마크만',false,()=>{location.hash='#bm';}));
+  }
+  if(c.kind==='videos'){
+    const link=document.createElement('a');link.className='chip';link.href='https://www.youtube.com/user/aaffffffffff123';
+    link.target='_blank';link.rel='noopener noreferrer';link.textContent='유튜브 채널 ↗';h.appendChild(link);
   }
   if(c.kind==='bm'&&c.ids.length){
     const b=document.createElement('button');b.className='chip';b.textContent='북마크 링크 복사';
@@ -291,10 +389,13 @@ function listHead(){
     b.onclick=()=>{c.ids.forEach(id=>bm.add(id));saveBm();toast('북마크에 담았어요');};
     h.appendChild(b);
   }
+  if(c.ids.length){const hint=document.createElement('span');hint.className='wall-hint';hint.textContent='옆으로 밀어 계속 보기 →';h.appendChild(hint);}
 }
 function renderList(){
   listHead();
+  el.grid.classList.toggle('video-grid',ctx.kind==='videos');
   el.grid.innerHTML='';shown=0;
+  el.grid.scrollLeft=0;
   el.empty.hidden=true;
   if(!ctx.ids.length){
     el.empty.hidden=false;
@@ -307,19 +408,28 @@ function renderMore(){
   const ids=ctx.ids.slice(shown,shown+PAGE);
   const frag=document.createDocumentFragment();
   ids.forEach((id,i)=>{
-    const a=document.createElement('a');a.href='#'+id;a.setAttribute('aria-label','만화 열기');
-    const im=document.createElement('img');im.loading='lazy';im.decoding='async';im.src='thumb/'+id+'.jpg';im.alt='';
+    const u=item(id), video=u&&u.type==='video';
+    const a=document.createElement('a');a.href=video?'#v/'+id:'#'+id;a.setAttribute('aria-label',video?u.title+' 영상 보기':'만화 열기');
+    const im=document.createElement('img');im.loading='lazy';im.decoding='async';im.src=video?thumb(u):'thumb/'+id+'.jpg';im.alt='';
     a.appendChild(im);
-    const u=byId.get(id); if(u&&u.pages.length>1){ const b=document.createElement('span'); b.className='pg'; b.textContent=u.pages.length; a.appendChild(b); }
+    if(video){
+      const play=document.createElement('span');play.className='play-icon';play.textContent='▶';play.setAttribute('aria-hidden','true');a.appendChild(play);
+      const title=document.createElement('span');title.className='video-card-title';title.textContent=u.title;a.appendChild(title);
+    }else if(u&&u.pages.length>1){ const b=document.createElement('span'); b.className='pg'; b.textContent=u.pages.length; a.appendChild(b); }
     const idx=shown+i;
-    a.onclick=e=>{e.preventDefault();ctx.index=idx;show(byId.get(id),{push:true});};
+    a.onclick=e=>{e.preventDefault();ctx.index=idx;show(u,{push:true,direction:1});};
     frag.appendChild(a);
   });
   el.grid.appendChild(frag);shown+=ids.length;
   el.more.hidden=shown>=ctx.ids.length;
 }
 el.more.onclick=renderMore;
-new IntersectionObserver(es=>{if(es[0].isIntersecting&&!el.more.hidden&&view==='list') renderMore();},{rootMargin:'600px'}).observe(el.more);
+el.grid.addEventListener('scroll',()=>{
+  if(view==='list'&&!el.more.hidden&&el.grid.scrollLeft+el.grid.clientWidth>=el.grid.scrollWidth-700) renderMore();
+},{passive:true});
+el.grid.addEventListener('wheel',e=>{
+  if(Math.abs(e.deltaY)>Math.abs(e.deltaX)){e.preventDefault();el.grid.scrollLeft+=e.deltaY;}
+},{passive:false});
 
 function browseIds(){
   let seed=sessionStorage.getItem('hg_seed');
@@ -357,7 +467,7 @@ function step(d){
   if(!ctx||ctx.index<0) return;
   const i=ctx.index+d;
   if(i<0||i>=ctx.ids.length){toast(d>0?'마지막이에요':'첫 번째예요');return;}
-  ctx.index=i; show(byId.get(ctx.ids[i]),{push:true});
+  ctx.index=i; show(item(ctx.ids[i]),{push:true,direction:d});
 }
 function save(c){
   c.pages.forEach((pid,i)=>{
@@ -375,6 +485,7 @@ function rebuild(sc,id){
   switch(sc.kind){
     case 'browse': ids=browseIds(); title='열람'; break;
     case 'search': ids=search(sc.extra.q||''); title='검색'; break;
+    case 'videos': ids=videos.map(v=>v.id); title='영상'; break;
     case 'bm': ids=[...bm]; title='북마크'; break;
     case 'sim': ids=sc.ids||[]; title='비슷한 만화'; break;
     case 'import': ids=sc.ids||[]; title='받은 북마크'; break;
@@ -383,18 +494,19 @@ function rebuild(sc,id){
   if(i<0) return null;
   return {kind:sc.kind,ids,title,index:i,extra:sc.extra||{}};
 }
-function ctxHash(){ if(!ctx) return '#'; switch(ctx.kind){case 'browse':return '#b';case 'sim':return '#sim/'+ctx.extra.id;case 'search':return '#s/'+encodeURIComponent(ctx.extra.q||'');case 'bm':return '#bm';case 'import':return '#bm/'+ctx.ids.join(',');} return '#'; }
-function scrollToCurrent(){ if(!cur) return; const a=el.grid.querySelector('a[href="#'+cur.id+'"]'); if(a) a.scrollIntoView({block:'center'}); }
+function ctxHash(){ if(!ctx) return '#'; switch(ctx.kind){case 'browse':return '#b';case 'videos':return '#videos';case 'sim':return '#sim/'+ctx.extra.id;case 'search':return '#s/'+encodeURIComponent(ctx.extra.q||'');case 'bm':return '#bm';case 'import':return '#bm/'+ctx.ids.join(',');} return '#'; }
+function scrollToCurrent(){ if(!cur) return; const a=el.grid.querySelector('a[href="'+(cur.type==='video'?'#v/':'#')+cur.id+'"]'); if(a) a.scrollIntoView({inline:'center',block:'nearest'}); }
 
-el.bRandom.onclick=goRandom;
+el.bRandom.onclick=goForward;
 el.bSim.onclick=()=>{ if(cur) location.hash='#sim/'+cur.id; };
-el.bBm.onclick=()=>{ if(!cur) return; if(bm.has(cur.id)){bm.delete(cur.id);toast('북마크에서 뺐어요');}else{bm.add(cur.id);toast('북마크했어요');} saveBm(); el.bBm.classList.toggle('on',bm.has(cur.id)); };
-el.bSave.onclick=()=>{ if(cur) save(cur); };
+el.bBm.onclick=()=>{ if(!cur||cur.type==='video') return; if(bm.has(cur.id)){bm.delete(cur.id);toast('북마크에서 뺐어요');}else{bm.add(cur.id);toast('북마크했어요');} saveBm(); el.bBm.classList.toggle('on',bm.has(cur.id)); };
+el.bSave.onclick=()=>{ if(cur&&cur.type!=='video') save(cur); };
 el.bList.onclick=()=>{ if(!ctx) return; const keep=ctx; history.pushState({},'',ctxHash()); openList(keep.kind,keep.ids,keep.title,keep.extra,true); if(keep.kind==='search') el.search.classList.add('show'); };
-el.bPrev.onclick=()=>step(-1); el.bNext.onclick=()=>step(1);
-el.edgeL.onclick=()=>step(-1); el.edgeR.onclick=()=>step(1);
+el.bPrev.onclick=goBack; el.bNext.onclick=goForward;
+el.edgeL.onclick=goBack; el.edgeR.onclick=goForward;
 el.bSearch.onclick=()=>{ location.hash='#s'; };
 el.bBrowse.onclick=()=>{ location.hash='#b'; };
+el.bVideos.onclick=()=>{ location.hash='#videos'; };
 el.logo.onclick=e=>{e.preventDefault();goRandom();};
 
 let qT=null;
@@ -403,9 +515,9 @@ el.q.addEventListener('keydown',e=>{if(e.key==='Enter') el.q.blur();});
 
 document.addEventListener('keydown',e=>{
   if(e.target===el.q||view==='list') return;
-  if(e.key==='ArrowRight'){ ctx?step(1):goRandom(); }
-  else if(e.key==='ArrowLeft'){ if(ctx) step(-1); }
-  else if(e.key===' '){ e.preventDefault(); ctx?step(1):goRandom(); }
+  if(e.key==='ArrowRight'){ goForward(); }
+  else if(e.key==='ArrowLeft'){ goBack(); }
+  else if(e.key===' '){ e.preventDefault(); goForward(); }
   else if(e.key==='b'||e.key==='B'){ el.bBm.click(); }
 });
 let tx=null,ty=null;
@@ -413,8 +525,12 @@ el.stage.addEventListener('touchstart',e=>{const t=e.changedTouches[0];tx=t.clie
 el.stage.addEventListener('touchend',e=>{
   if(tx==null) return; const t=e.changedTouches[0]; const dx=t.clientX-tx, dy=t.clientY-ty; tx=ty=null;
   if(Math.abs(dx)<60||Math.abs(dy)>Math.abs(dx)) return;
-  if(ctx) step(dx<0?1:-1); else if(dx<0) goRandom();
+  if(dx<0) goForward(); else goBack();
 },{passive:true});
+// Desktop drag works like flicking through pages; vertical touch remains native scrolling.
+let dragX=null,dragY=null;
+el.stage.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&e.button===0&&!e.target.closest('button,a,iframe')){dragX=e.clientX;dragY=e.clientY;}}, {passive:true});
+el.stage.addEventListener('pointerup',e=>{if(dragX===null)return;const dx=e.clientX-dragX,dy=e.clientY-dragY;dragX=dragY=null;if(Math.abs(dx)>75&&Math.abs(dx)>Math.abs(dy)*1.3){if(dx<0)goForward();else goBack();}}, {passive:true});
 
 /* ---------- routing ---------- */
 function route(){
@@ -430,9 +546,18 @@ function route(){
     const st=history.state;
     if(st&&st.ctx) ctx=rebuild(st.ctx,h);
     else if(ctx){ const i=ctx.ids.indexOf(h); if(i>=0) ctx.index=i; else ctx=null; }
+    if(!ctx){trail=[c.id];trailIndex=0;}
     show(c); return;
   }
+  if(h.startsWith('v/')){
+    const v=byVideo.get(h.slice(2));if(!v){goRandom();return;}
+    const st=history.state;
+    if(st&&st.ctx) ctx=rebuild(st.ctx,v.id);
+    else ctx=rebuild({kind:'videos',extra:{}},v.id);
+    show(v);return;
+  }
   if(h==='b'){ openList('browse',browseIds(),'열람',null,back); return; }
+  if(h==='videos'){ openList('videos',videos.map(v=>v.id),'영상',null,back); return; }
   if(h==='bm'){ openList('bm',[...bm],'북마크',null,back); return; }
   if(h.startsWith('bm/')){ const ids=h.slice(3).split(',').filter(id=>byId.has(id)); openList('import',ids,'받은 북마크',null,back); return; }
   if(h.startsWith('sim/')){
