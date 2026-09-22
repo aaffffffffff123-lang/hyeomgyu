@@ -57,6 +57,7 @@ svg.ic{fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;strok
 #edgeL{left:14px}#edgeR{right:14px}
 @media(min-width:900px){body.reading .edge{display:flex}}
 .edge:disabled{opacity:.3;cursor:default}
+body.reading .edge:disabled{display:none}
 .edge img,.edge span{display:none}
 @media(min-width:1240px){
   body.reading .edge:not(:disabled){width:clamp(108px,11vw,154px);height:auto;min-height:148px;flex-direction:column;gap:8px;padding:8px}
