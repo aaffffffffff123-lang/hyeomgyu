@@ -30,8 +30,11 @@ img{display:block;max-width:100%}
 #top{position:fixed;top:0;left:0;right:0;height:calc(var(--top) + var(--sat));padding:calc(10px + var(--sat)) 12px 0;display:flex;align-items:center;justify-content:space-between;z-index:20;pointer-events:none}
 #top>*{pointer-events:auto}
 #topLeft{display:flex;align-items:center;gap:10px;min-width:0}
-#logo{font-family:Gulim,"굴림",sans-serif;font-size:19px;font-weight:400;letter-spacing:-.2px;line-height:1;padding:8px 11px 7px;border:2px solid var(--ink);background:var(--white);box-shadow:3px 3px 0 var(--ink);text-decoration:none;white-space:nowrap;transform:rotate(-1deg);transition:transform .08s,box-shadow .08s}
-#logo:active{transform:translate(3px,3px) rotate(-1deg);box-shadow:none}
+#logo{display:block;flex:none;width:119px;height:44px;line-height:0;text-decoration:none;transition:transform .08s}
+#logo:active{transform:translate(2px,2px)}
+#logo svg{display:block;width:100%;height:100%}
+#logo .logo-depth{fill:#292929;stroke:#292929;stroke-width:1.2;stroke-linejoin:round;paint-order:stroke fill}
+#logo .logo-face{fill:#fff;stroke:#111;stroke-width:1.8;stroke-linejoin:round;paint-order:stroke fill}
 #homeLink{display:block;flex:none;width:42px;height:42px;line-height:0;filter:drop-shadow(3px 3px 0 #AAB3AC);transition:transform .06s,filter .06s}
 #homeLink svg{display:block;width:100%;height:100%}
 #homeLink:active{transform:translate(3px,3px);filter:none}
@@ -39,7 +42,7 @@ img{display:block;max-width:100%}
 .round:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
 .round.on{background:var(--mark)}
 .round svg{width:20px;height:20px}
-@media(max-width:430px){#topLeft{gap:7px}#logo{font-size:17px;padding:7px 8px 6px}#homeLink{width:38px;height:38px}.round{width:36px;height:36px;margin-left:4px}}
+@media(max-width:430px){#topLeft{gap:5px}#logo{width:106px;height:40px}#homeLink{width:38px;height:38px}.round{width:36px;height:36px;margin-left:4px}}
 svg.ic{fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
 
 /* ---------- stage (single comic) ---------- */
@@ -110,7 +113,20 @@ svg.ic{fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;strok
 
 <div id="top">
   <div id="topLeft">
-    <a id="logo" href="#" aria-label="혐규만화 처음으로">혐규만화</a>
+    <a id="logo" href="#" aria-label="혐규만화 처음으로">
+      <svg viewBox="0 0 130 48" aria-hidden="true">
+        <defs>
+          <text id="logo-h" x="0" y="34" font-family="Gulim, 굴림, sans-serif" font-size="27" font-weight="700">혐</text>
+          <text id="logo-g" x="0" y="34" font-family="Gulim, 굴림, sans-serif" font-size="27" font-weight="700">규</text>
+          <text id="logo-m" x="0" y="34" font-family="Gulim, 굴림, sans-serif" font-size="27" font-weight="700">만</text>
+          <text id="logo-w" x="0" y="34" font-family="Gulim, 굴림, sans-serif" font-size="27" font-weight="700">화</text>
+        </defs>
+        <g transform="translate(2 -1) rotate(-6 13 25)"><use href="#logo-h" class="logo-depth" transform="translate(3 4)"/><use href="#logo-h" class="logo-depth" transform="translate(2 3)"/><use href="#logo-h" class="logo-depth" transform="translate(1 2)"/><use href="#logo-h" class="logo-face"/></g>
+        <g transform="translate(32 1) rotate(4 13 25)"><use href="#logo-g" class="logo-depth" transform="translate(3 4)"/><use href="#logo-g" class="logo-depth" transform="translate(2 3)"/><use href="#logo-g" class="logo-depth" transform="translate(1 2)"/><use href="#logo-g" class="logo-face"/></g>
+        <g transform="translate(62 -2) rotate(-3 13 25)"><use href="#logo-m" class="logo-depth" transform="translate(3 4)"/><use href="#logo-m" class="logo-depth" transform="translate(2 3)"/><use href="#logo-m" class="logo-depth" transform="translate(1 2)"/><use href="#logo-m" class="logo-face"/></g>
+        <g transform="translate(92 1) rotate(6 13 25)"><use href="#logo-w" class="logo-depth" transform="translate(3 4)"/><use href="#logo-w" class="logo-depth" transform="translate(2 3)"/><use href="#logo-w" class="logo-depth" transform="translate(1 2)"/><use href="#logo-w" class="logo-face"/></g>
+      </svg>
+    </a>
     <a id="homeLink" href="https://aaffffffffff123-lang.github.io/aaffffffffff123/" aria-label="혐규 홈페이지로 이동" title="혐규 홈페이지">
       <svg viewBox="0 0 48 48" aria-hidden="true">
         <path d="M24.00 2.84 C27.19 2.93 30.48 3.49 33.44 4.70 C36.39 5.91 39.79 7.65 41.72 10.08 C43.64 12.51 44.41 16.18 44.97 19.28 C45.53 22.39 45.73 25.72 45.08 28.74 C44.42 31.76 43.07 35.11 41.06 37.40 C39.05 39.69 35.87 41.15 33.03 42.47 C30.19 43.79 27.09 45.14 24.00 45.31 C20.91 45.47 17.40 44.72 14.49 43.46 C11.58 42.19 8.30 40.21 6.54 37.72 C4.78 35.22 4.45 31.57 3.93 28.51 C3.41 25.45 2.76 22.23 3.42 19.37 C4.08 16.52 6.10 13.90 7.91 11.36 C9.72 8.82 11.61 5.56 14.29 4.14 C16.97 2.72 20.81 2.75 24.00 2.84 Z" fill="#221D1F"/>
