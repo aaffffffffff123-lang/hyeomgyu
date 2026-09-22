@@ -2,7 +2,9 @@
 
 - 그림 파일(png/jpg/jpeg/webp): 새 만화로 처리 -> img/번호.png, thumb/번호.jpg, list.csv 한 줄
 - zip: 안에 list.csv 와 img/ 가 있으면 준비된 묶음으로 보고 그대로 합침,
-       아니면 안에 든 그림들을 전부 새 만화로 처리
+       아니면 안에 든 그림들을 전부 새 만화로 처리 (zip 안의 폴더 하나 = 여러 장짜리 한 편)
+- 여러 장짜리 만화: 이름-1.png, 이름-2.png 처럼 끝 번호만 다른 파일들을 함께 올리면 한 편으로 묶임
+  (list.csv 의 episode 칸에 첫 장 번호, page 칸에 장 순서)
 - 새 만화가 이미 있는 만화와 같으면(그림 해시 또는 대사 비교) 추가하지 않고
   inbox/duplicates/ 에 옮기고 중복.txt 에 적는다
 - img/ 에 그림이 없어진 줄은 list.csv 에서 뺀다
@@ -16,7 +18,7 @@ os.environ['TESSDATA_PREFIX'] = os.path.join(TOOLS, 'tessdata')
 sys.path.insert(0, TOOLS)
 
 INBOX, IMG, THUMB, LIST = (os.path.join(ROOT, d) for d in ('inbox', 'img', 'thumb', 'list.csv'))
-COLS = ['id', 'hidden', 'keywords', 'text']
+COLS = ['id', 'hidden', 'keywords', 'text', 'episode', 'page']
 IMG_EXT = ('.png', '.jpg', '.jpeg', '.webp')
 
 
@@ -181,7 +183,7 @@ def find_duplicate(png, text, rows, hashes):
     return None
 
 
-def add_comic(src, rows, hashes=None):
+def add_comic(src, rows, hashes=None, episode='', page=''):
     cid = next_id(rows)
     png, jpg = os.path.join(IMG, cid + '.png'), os.path.join(THUMB, cid + '.jpg')
     to_web(src, png, jpg)
@@ -196,7 +198,7 @@ def add_comic(src, rows, hashes=None):
             f.write(f'{os.path.basename(src)} -> 이미 있는 {dup[0]}번과 같은 만화 ({dup[1]}). 추가하지 않고 inbox/duplicates 에 옮겨 둠\n')
         print(f'중복: {os.path.basename(src)} = {dup[0]} ({dup[1]})')
         return None
-    rows.append({'id': cid, 'hidden': '', 'keywords': keywords(text), 'text': text})
+    rows.append({'id': cid, 'hidden': '', 'keywords': keywords(text), 'text': text, 'episode': episode, 'page': str(page) if page else ''})
     if hashes is not None:
         try:
             hashes[cid] = phash(png)
@@ -236,15 +238,63 @@ def merge_bundle(folder, rows):
             t = Image.open(os.path.join(IMG, f)).convert('L'); t.thumbnail((360, 360)); t.save(os.path.join(THUMB, cid + '.jpg'), 'JPEG', quality=80, optimize=True)
 
 
+PAGE_RE = re.compile(r'^(.*?)[\s_\-]*[\(\[]?(\d{1,2})[\)\]]?$')
+
+
+def group_pages(names):
+    """같은 이름에 끝 번호만 다른 파일들(예: 이름-1.png, 이름-2.png)을 한 편으로 묶는다.
+    반환: [[파일명, ...], ...] (각 묶음은 번호 순서)"""
+    buckets = collections.OrderedDict()
+    for n in names:
+        stem, ext = os.path.splitext(n)
+        m = PAGE_RE.match(stem)
+        key = (m.group(1).strip().lower() if m and m.group(1).strip() else None)
+        num = int(m.group(2)) if m else None
+        if key is None:
+            buckets.setdefault(('single', n), []).append((0, n))
+        else:
+            buckets.setdefault(('grp', key), []).append((num, n))
+    out = []
+    for k, items in buckets.items():
+        items.sort()
+        if k[0] == 'grp' and len(items) > 1:
+            out.append([n for _, n in items])
+        else:
+            out.extend([[n] for _, n in items])
+    return out
+
+
+def add_episode(paths, rows, hashes):
+    """여러 장짜리 한 편: 첫 장 번호를 episode 로, page 는 1부터"""
+    first = None
+    for i, pth in enumerate(paths):
+        cid = add_comic(pth, rows, hashes, episode=first or '', page=i + 1 if len(paths) > 1 else '')
+        if cid and first is None:
+            first = cid
+            rows[-1]['episode'] = cid if len(paths) > 1 else ''
+            rows[-1]['page'] = '1' if len(paths) > 1 else ''
+    return first
+
+
 def main():
     for d in (INBOX, IMG, THUMB):
         os.makedirs(d, exist_ok=True)
     rows = read_list()
     hashes = load_hashes(rows)
     items = sorted(os.listdir(INBOX))
+    loose = [n for n in items if n.lower().endswith(IMG_EXT) and not n.startswith('.')]
+    for grp in group_pages(loose):
+        try:
+            add_episode([os.path.join(INBOX, n) for n in grp], rows, hashes)
+            for n in grp:
+                os.remove(os.path.join(INBOX, n))
+        except Exception:
+            print('처리 실패:', grp); traceback.print_exc()
     for name in items:
         p = os.path.join(INBOX, name)
         low = name.lower()
+        if name in loose:
+            continue
         try:
             if low.endswith('.zip'):
                 with tempfile.TemporaryDirectory() as tmp:
@@ -259,15 +309,29 @@ def main():
                         for root, _, fs in os.walk(base):
                             if '__MACOSX' in root:
                                 continue
-                            for f in sorted(fs):
-                                if f.lower().endswith(IMG_EXT) and not f.startswith('.'):
-                                    add_comic(os.path.join(root, f), rows, hashes)
-                os.remove(p)
-            elif low.endswith(IMG_EXT) and not name.startswith('.'):
-                add_comic(p, rows, hashes)
+                            imgs = sorted(f for f in fs if f.lower().endswith(IMG_EXT) and not f.startswith('.'))
+                            if not imgs:
+                                continue
+                            if root != base and len(imgs) > 1:
+                                add_episode([os.path.join(root, f) for f in imgs], rows, hashes)  # 폴더 하나 = 한 편
+                            else:
+                                for grp in group_pages(imgs):
+                                    add_episode([os.path.join(root, f) for f in grp], rows, hashes)
                 os.remove(p)
         except Exception:
             print('처리 실패:', name); traceback.print_exc()
+    # episodes.txt: 이미 올라간 만화를 여러 장짜리 한 편으로 묶는 목록 (한 줄에 번호들을 순서대로)
+    ep_path = os.path.join(ROOT, 'episodes.txt')
+    if os.path.exists(ep_path):
+        byid = {r['id']: r for r in rows}
+        for line in open(ep_path, encoding='utf-8'):
+            line = line.split('#')[0].strip()
+            ids = [x.zfill(4) for x in re.split(r'[\s,~\-]+', line) if x.strip().isdigit()]
+            ids = [x for x in ids if x in byid]
+            if len(ids) < 2:
+                continue
+            for i, cid in enumerate(ids):
+                byid[cid]['episode'] = ids[0]; byid[cid]['page'] = str(i + 1)
     # 그림이 없어진 줄 정리
     rows = [r for r in rows if os.path.exists(os.path.join(IMG, r['id'] + '.png'))]
     rows.sort(key=lambda r: int(r['id']) if r['id'].isdigit() else 10**9)
