@@ -11,7 +11,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='2' y='2' width='28' height='28' fill='%23fff' stroke='%23000' stroke-width='3'/%3E%3Cpath d='M2 16h28M16 2v28' stroke='%23000' stroke-width='3'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&family=Noto+Sans+KR:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@500;700&display=swap" rel="stylesheet">
 <style>
 :root{
   --paper:#ECEBE6; --ink:#000; --white:#fff; --mark:#FFD500; --mute:#6b6b66;
@@ -30,16 +30,15 @@ img{display:block;max-width:100%}
 #top{position:fixed;top:0;left:0;right:0;height:calc(var(--top) + var(--sat));padding:calc(10px + var(--sat)) 12px 0;display:flex;align-items:center;justify-content:space-between;z-index:20;pointer-events:none}
 #top>*{pointer-events:auto}
 #topLeft{display:flex;align-items:center;gap:10px;min-width:0}
-#logo{font-family:"Nanum Pen Script",cursive;font-size:35px;letter-spacing:-1px;line-height:1;padding:3px 5px 2px;position:relative;text-decoration:none;white-space:nowrap;transform:rotate(-2deg)}
-#logo::after{content:"";position:absolute;left:6px;right:5px;bottom:0;border-bottom:2px solid currentColor;transform:rotate(-1.5deg)}
-#homeLink{height:38px;display:inline-flex;align-items:center;gap:4px;padding:5px 10px 5px 7px;border:2.5px solid var(--ink);background:var(--white);box-shadow:3px 3px 0 var(--ink);font-size:15px;font-weight:700;line-height:1;text-decoration:none;white-space:nowrap;transition:transform .06s,box-shadow .06s}
-#homeLink:active{transform:translate(3px,3px);box-shadow:none}
-#homeLink .brand-tag{display:flex;flex-direction:column;align-items:center;gap:1px;color:#E0301E;font-size:9px;font-weight:900;line-height:1}
+#logo{font-family:Gulim,"굴림",sans-serif;font-size:21px;font-weight:400;letter-spacing:0;line-height:1;padding:8px 3px;text-decoration:none;white-space:nowrap}
+#homeLink{display:block;flex:none;width:42px;height:42px;line-height:0;filter:drop-shadow(3px 3px 0 #AAB3AC);transition:transform .06s,filter .06s}
+#homeLink svg{display:block;width:100%;height:100%}
+#homeLink:active{transform:translate(3px,3px);filter:none}
 .round{width:40px;height:40px;border-radius:50%;background:var(--white);border:2.5px solid var(--ink);display:inline-flex;align-items:center;justify-content:center;box-shadow:3px 3px 0 var(--ink);margin-left:8px;transition:transform .08s}
 .round:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
 .round.on{background:var(--mark)}
 .round svg{width:20px;height:20px}
-@media(max-width:430px){#topLeft{gap:5px}#logo{font-size:28px;padding-left:1px;padding-right:1px}#homeLink{height:35px;padding:4px 7px 4px 5px;font-size:13px}.round{width:36px;height:36px;margin-left:4px}}
+@media(max-width:430px){#topLeft{gap:5px}#logo{font-size:19px;padding-left:1px;padding-right:1px}#homeLink{width:38px;height:38px}.round{width:36px;height:36px;margin-left:4px}}
 svg.ic{fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
 
 /* ---------- stage (single comic) ---------- */
@@ -111,7 +110,14 @@ svg.ic{fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;strok
 <div id="top">
   <div id="topLeft">
     <a id="logo" href="#" aria-label="혐규만화 처음으로">혐규만화</a>
-    <a id="homeLink" href="https://aaffffffffff123-lang.github.io/aaffffffffff123/" aria-label="혐규 홈페이지로 이동" title="혐규 홈페이지"><span class="brand-tag" aria-hidden="true"><span>혐</span><span>규</span></span>홈</a>
+    <a id="homeLink" href="https://aaffffffffff123-lang.github.io/aaffffffffff123/" aria-label="혐규 홈페이지로 이동" title="혐규 홈페이지">
+      <svg viewBox="0 0 48 48" aria-hidden="true">
+        <path d="M24.00 2.84 C27.19 2.93 30.48 3.49 33.44 4.70 C36.39 5.91 39.79 7.65 41.72 10.08 C43.64 12.51 44.41 16.18 44.97 19.28 C45.53 22.39 45.73 25.72 45.08 28.74 C44.42 31.76 43.07 35.11 41.06 37.40 C39.05 39.69 35.87 41.15 33.03 42.47 C30.19 43.79 27.09 45.14 24.00 45.31 C20.91 45.47 17.40 44.72 14.49 43.46 C11.58 42.19 8.30 40.21 6.54 37.72 C4.78 35.22 4.45 31.57 3.93 28.51 C3.41 25.45 2.76 22.23 3.42 19.37 C4.08 16.52 6.10 13.90 7.91 11.36 C9.72 8.82 11.61 5.56 14.29 4.14 C16.97 2.72 20.81 2.75 24.00 2.84 Z" fill="#221D1F"/>
+        <g stroke="#EFF1EC" stroke-width="1.9" stroke-linecap="round" fill="none"><path d="M13.2 8.4V17.9"/><path d="M20.4 6.2V16.6"/><path d="M27.6 6.2V16.6"/><path d="M34.6 8.8V18.3"/></g>
+        <g fill="#EFF1EC"><ellipse cx="18.1" cy="25.2" rx="1.75" ry="2.05"/><ellipse cx="29.9" cy="25.2" rx="1.75" ry="2.05"/></g>
+        <path d="M19.9 32.3a4.6 4.6 0 0 0 8.2 0" fill="none" stroke="#EFF1EC" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </a>
   </div>
   <div>
     <button class="round" id="bSearch" aria-label="검색"><svg class="ic" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg></button>
