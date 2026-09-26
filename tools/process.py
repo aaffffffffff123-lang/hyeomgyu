@@ -18,7 +18,7 @@ os.environ['TESSDATA_PREFIX'] = os.path.join(TOOLS, 'tessdata')
 sys.path.insert(0, TOOLS)
 
 INBOX, IMG, THUMB, LIST = (os.path.join(ROOT, d) for d in ('inbox', 'img', 'thumb', 'list.csv'))
-COLS = ['id', 'hidden', 'keywords', 'text', 'episode', 'page']
+COLS = ['id', 'hidden', 'keywords', 'text', 'episode', 'page', 'review_status', 'review_note']
 IMG_EXT = ('.png', '.jpg', '.jpeg', '.webp')
 
 
@@ -198,7 +198,9 @@ def add_comic(src, rows, hashes=None, episode='', page=''):
             f.write(f'{os.path.basename(src)} -> 이미 있는 {dup[0]}번과 같은 만화 ({dup[1]}). 추가하지 않고 inbox/duplicates 에 옮겨 둠\n')
         print(f'중복: {os.path.basename(src)} = {dup[0]} ({dup[1]})')
         return None
-    rows.append({'id': cid, 'hidden': '', 'keywords': keywords(text), 'text': text, 'episode': episode, 'page': str(page) if page else ''})
+    rows.append({'id': cid, 'hidden': '', 'keywords': keywords(text), 'text': text,
+                 'episode': episode, 'page': str(page) if page else '',
+                 'review_status': '', 'review_note': ''})
     if hashes is not None:
         try:
             hashes[cid] = phash(png)
@@ -221,12 +223,15 @@ def merge_bundle(folder, rows):
     if os.path.exists(lp):
         byid = {r['id']: r for r in rows}
         with open(lp, encoding='utf-8-sig', newline='') as f:
-            for r in csv.DictReader(f):
-                r = {c: (r.get(c) or '') for c in COLS}
+            reader = csv.DictReader(f)
+            supplied_cols = set(reader.fieldnames or [])
+            for source in reader:
+                r = {c: (source.get(c) or '') for c in COLS}
                 if not r['id']:
                     continue
                 if r['id'] in byid:
-                    byid[r['id']].update(r)
+                    # An older bundle has no review columns; do not erase a manual review.
+                    byid[r['id']].update({c: r[c] for c in COLS if c in supplied_cols})
                 else:
                     rows.append(r); byid[r['id']] = r
     print(f'묶음 합침: 그림 {n}장')
