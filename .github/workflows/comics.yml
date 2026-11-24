@@ -89,10 +89,20 @@ jobs:
             fi
             echo "revision=$rev" >> "$GITHUB_OUTPUT"
             if [[ "$PAGES_MODE" == legacy && ( "$rev" != "$tip" || "$GITHUB_EVENT_NAME" == workflow_dispatch ) ]]; then
+              # Some pushes already start a branch build. Request one only if needed.
+              build_registered() {
+                gh api "$runs&head_sha=$rev&per_page=10" --jq 'any(.workflow_runs[]; .status != "completed" or .conclusion == "success")'
+              }
+              if [[ "$rev" != "$tip" ]]; then
+                for delay in 0 5 10 15; do
+                  sleep "$delay"
+                  registered=$(build_registered)
+                  if [[ "$registered" == true ]]; then exit 0; fi
+                done
+              fi
               if ! gh api --method POST "$api/pages/builds" --jq .status; then
-                # A branch build may already have been queued by the push.
-                existing=$(gh api "$runs&head_sha=$rev&per_page=1" --jq '.workflow_runs[0] | .status != null and (.status != "completed" or .conclusion == "success")')
-                [[ "$existing" == true ]] || exit 1
+                registered=$(build_registered)
+                [[ "$registered" == true ]] || exit 1
               fi
             fi
             exit 0
